@@ -1,0 +1,12 @@
+{
+    "name": "Tarot card 1",
+    "description": "Tarot card 1 description.",
+    "image": "https://assets.tarabbit.com/nft/2.jpg",
+    "content_url": "https://assets.tarabbit.com/nft/2.jpg",
+    "attributes": [
+        {
+            "trait_type": "gold",
+            "value": "Super cool"
+        }
+    ]
+}

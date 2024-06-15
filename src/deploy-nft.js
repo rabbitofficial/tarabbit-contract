@@ -9,7 +9,7 @@ require("dotenv").config();
 const BN = TonWeb.utils.BN;
 
 const is_prod = true;
-const mnemonic = is_prod ? process.env.prod_mem : process.env.test_mem;
+const mnemonic = is_prod ? process.env.prod_mem_tarabbit : process.env.test_mem;
 
 async function init() {
   const tonweb = new TonWeb(
@@ -24,7 +24,7 @@ async function init() {
   const seed = await tonMnemonic.mnemonicToSeed(mnemonic.split(" "));
   const keyPair = TonWeb.utils.nacl.sign.keyPair.fromSeed(seed);
 
-  const WalletClass = tonweb.wallet.all["v4R2"];
+  const WalletClass = tonweb.wallet.all["v3R2"];
   const wallet = new WalletClass(tonweb.provider, {
     publicKey: keyPair.publicKey,
     wc: 0,
@@ -51,11 +51,11 @@ async function init() {
     nftCollectionAddress.toString(true, true, true)
   ); */
 
-  const nftCollection = new NftCollection(tonweb.provider, {
+  /*   const nftCollection = new NftCollection(tonweb.provider, {
     address: is_prod
       ? process.env.main_nft_collection_address
       : process.env.test_nft_collection_address,
-  });
+  }); */
 
   const deployNftCollection = async () => {
     const seqno = (await wallet.methods.seqno().call()) || 0;

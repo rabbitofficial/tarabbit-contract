@@ -5,7 +5,9 @@ const { NftMarketplace } = require("./contract/token/nft/NftMarketplace");
 const { NftSale } = require("./contract/token/nft/NftSale");
 const tonMnemonic = require("tonweb-mnemonic");
 require("dotenv").config();
-
+const delay = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 const BN = TonWeb.utils.BN;
 
 const is_prod = true;
@@ -34,24 +36,22 @@ async function init() {
 
   console.log("wallet address=", walletAddress.toString(true, true, true));
 
-  /* const nftCollection = new NftCollection(tonweb.provider, {
+  const nftCollection = new NftCollection(tonweb.provider, {
     ownerAddress: walletAddress,
-    royalty: 0.12,
+    royalty: 0.11,
     royaltyAddress: walletAddress,
-    collectionContentUri:
-      process.env.collectionContentUri,
-    nftItemContentBaseUri:
-      process.env.nftItemContentBaseUri,
+    collectionContentUri: process.env.collectionContentUri2,
+    nftItemContentBaseUri: process.env.nftItemContentBaseUri,
     nftItemCodeHex: NftItem.codeHex,
-  }); */
+  });
 
-  /* const nftCollectionAddress = await nftCollection.getAddress();
+  const nftCollectionAddress = await nftCollection.getAddress();
   console.log(
     "collection address=",
     nftCollectionAddress.toString(true, true, true)
-  ); */
+  );
 
-  /*   const nftCollection = new NftCollection(tonweb.provider, {
+  /* const nftCollection = new NftCollection(tonweb.provider, {
     address: is_prod
       ? process.env.main_nft_collection_address
       : process.env.test_nft_collection_address,
@@ -87,7 +87,7 @@ async function init() {
       true,
       true
     );
-    console.log(royaltyParams);
+    /* console.log("royaltyParams", royaltyParams);
     console.log(
       (await nftCollection.getNftItemAddressByIndex(0)).toString(
         true,
@@ -101,15 +101,21 @@ async function init() {
         true,
         true
       )
-    );
+    ); */
+
+    return data;
   };
 
   const deployNftItem = async () => {
+    const result = await getNftCollectionInfo();
+    console.log("index:", result.nextItemIndex);
+    //return;
     const seqno = (await wallet.methods.seqno().call()) || 0;
     console.log({ seqno });
 
-    const amount = TonWeb.utils.toNano("0.01");
-
+    const amount = TonWeb.utils.toNano("0.013");
+    const nftGlobalIndex = result.nextItemIndex;
+    console.log("nftGlobalIndex:", nftGlobalIndex);
     console.log(
       await wallet.methods
         .transfer({
@@ -122,9 +128,9 @@ async function init() {
           seqno: seqno,
           payload: await nftCollection.createMintBody({
             amount,
-            itemIndex: 1,
+            itemIndex: nftGlobalIndex,
             itemOwnerAddress: walletAddress,
-            itemContentUri: "tarabbit_2.json",
+            itemContentUri: `tarabbit_${nftGlobalIndex + 1}.json`,
           }),
           sendMode: 3,
         })
@@ -170,10 +176,10 @@ async function init() {
           payload: await nftCollection.createEditContentBody({
             royalty: 0.16,
             royaltyAddress: new TonWeb.Address(
-              "EQBvI0aFLnw2QbZgjMPCLRdtRHxhUyinQudg6sdiohIwg5jL"
+              "EQBhKHn45vXs7dCt_qdXqe_XsrJiIvMX65TZZ3KLU_20lnvn"
             ),
-            collectionContentUri: "ton://my-nft/collection.json",
-            nftItemContentBaseUri: "ton://my-nft/",
+            collectionContentUri: process.env.collectionContentUri,
+            nftItemContentBaseUri: process.env.nftItemContentBaseUri,
           }),
           sendMode: 3,
         })
@@ -381,6 +387,12 @@ async function init() {
 
   //ok
   //await getNftCollectionInfo();
+
+  await deployNftItem();
+
+  setInterval(async () => {
+    await deployNftItem();
+  }, 60000);
   //await deployNftItem();
 
   // await getNftItemInfo();
